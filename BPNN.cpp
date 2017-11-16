@@ -40,7 +40,7 @@ void BPNN::setOptions(vector<string> options) {
 }
 
 void BPNN::train(DataSet& dsN) {
-	//step 1
+	//step 1: determine hyperparameters
 	srand(dsN.getSeed());
 	DataSet dsB = dsN.nominalToBinary();
 	v.resize(hiddenLayerSize,
@@ -61,7 +61,7 @@ void BPNN::train(DataSet& dsN) {
 	int repeatCount = 0;
 	double error = 0;
 	int q = 1;
-	//step 2
+	//step 2: start training by classifying each sample
 	do {
 		error = 0;
 		for (int p = 0; p < dsB.getExamples().size(); p++) {
@@ -88,12 +88,12 @@ void BPNN::train(DataSet& dsN) {
 				o[k] = sigmoid(dotProduct);
 			}
 
-			//step 3
+			//step 3: compute error
 			for (int k = 0; k < o.size(); k++) {
 				error += (.5*(d[k] - o[k])*(d[k]-o[k]));
 			}
 			//cout << error << endl;
-			//step 4
+			//step 4: compute error signal vectors
 			vector<double> eO(o.size());
 			vector<double> eY(y.size() - 1);
 			for (int k = 0; k < eO.size(); k++) {
@@ -107,14 +107,14 @@ void BPNN::train(DataSet& dsN) {
 				eY[j] *= (y[j] * (1 - y[j]));
 			}
 
-			//step 5
+			//step 5: adjust output layer weights
 			for (int k = 0; k < o.size(); k++) {
 				for (int j = 0; j < y.size() - 1; j++) {
 					w[k][j] += eta*eO[k] * y[j];
 				}
 			}
 			
-			//step 6
+			//step 6: adjust hidden layer weights
 			for (int j = 0; j < y.size() - 1; j++) {
 				for (int i = 0; i < z.size()-1; i++) {
 					v[j][i] += eta*eY[j] * z[i];
